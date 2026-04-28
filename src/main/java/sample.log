@@ -1,0 +1,10 @@
+2026-04-28 09:00:01 INFO Application started
+2026-04-28 09:00:05 INFO Database connection established
+2026-04-28 09:02:14 WARN Slow database query detected
+2026-04-28 09:03:22 ERROR NullPointerException in UserService
+2026-04-28 09:04:10 INFO User login successful
+2026-04-28 09:05:33 WARN API response time exceeded threshold
+2026-04-28 09:06:45 ERROR Failed to process payment request
+2026-04-28 09:08:12 INFO Scheduled job completed
+2026-04-28 09:09:55 ERROR Database connection lost
+2026-04-28 09:10:30 INFO Application shutdown requested

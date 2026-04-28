@@ -1,5 +1,9 @@
+
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+
 
 public class LogFileAnalyzer {
     public static void main(String[] args) {
@@ -34,7 +38,15 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing summary command for: " + file);
+                        try {
+                            List<String> allLines = Files.readAllLines(Path.of(file));
+                            System.out.println("Total lines: " + allLines.size());
+                            return;
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
+
                 } else {
                     System.out.println("Too many arguments passed.");
                     System.out.println("Usage:");
@@ -108,7 +120,7 @@ public class LogFileAnalyzer {
 
     public static boolean isValidFilePath(String file) {
         Path path = Path.of(file);
-        
+
         if (!Files.exists(path)) {
             System.out.println("File not found: " + file);
             return false;
