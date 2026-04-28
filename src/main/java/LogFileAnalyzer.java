@@ -1,3 +1,6 @@
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class LogFileAnalyzer {
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -26,8 +29,16 @@ public class LogFileAnalyzer {
                     System.out.println("Missing file path.");
                     System.out.println("Usage:");
                     System.out.println("\tlogtool summary <file>");
+                } else if (args.length == 2) {
+                    String file = args[1];
+
+                    if (isValidFilePath(file)) {
+                        System.out.println("Processing summary command for: " + file);
+                    }
                 } else {
-                    System.out.println("Processing summary command");
+                    System.out.println("Too many arguments passed.");
+                    System.out.println("Usage:");
+                    System.out.println("\tlogtool summary <file>");
                 }
             }
             case "errors" -> {
@@ -35,8 +46,16 @@ public class LogFileAnalyzer {
                     System.out.println("Missing file path.");
                     System.out.println("Usage:");
                     System.out.println("\tlogtool errors <file>");
+                } else if (args.length == 2) {
+                    String file = args[1];
+
+                    if (isValidFilePath(file)) {
+                        System.out.println("Processing errors command for: " + file);
+                    }
                 } else {
-                    System.out.println("Processing errors command");
+                    System.out.println("Too many arguments passed.");
+                    System.out.println("Usage:");
+                    System.out.println("\tlogtool errors <file>");
                 }
             }
             case "warnings" -> {
@@ -44,8 +63,17 @@ public class LogFileAnalyzer {
                     System.out.println("Missing file path.");
                     System.out.println("Usage:");
                     System.out.println("\tlogtool warnings <file>");
+                } else if (args.length == 2) {
+
+                    String file = args[1];
+
+                    if (isValidFilePath(file)) {
+                        System.out.println("Processing warnings command for: " + file);
+                    }
                 } else {
-                    System.out.println("Processing warnings command");
+                    System.out.println("Too many arguments passed.");
+                    System.out.println("Usage:");
+                    System.out.println("\tlogtool warnings <file>");
                 }
             }
             case "search" -> {
@@ -57,8 +85,17 @@ public class LogFileAnalyzer {
                     System.out.println("Missing file.");
                     System.out.println("Usage:");
                     System.out.println("\tlogtool search <keyword> <file>");
-                } else {
-                   System.out.println("Processing search command");
+                } else if (args.length == 3) {
+                   String searchWord = args[1];
+                   String file = args[2];
+
+                   if (isValidFilePath(file)) {
+                       System.out.println("Processing search command for: " + searchWord + " in " + file);
+                   }
+               } else {
+                   System.out.println("Too many arguments passed.");
+                   System.out.println("Usage:");
+                   System.out.println("\tlogtool search <keyword> <file>");
                }
             }
             default -> {
@@ -67,5 +104,26 @@ public class LogFileAnalyzer {
             }
         }
 
+    }
+
+    public static boolean isValidFilePath(String file) {
+        Path path = Path.of(file);
+        
+        if (!Files.exists(path)) {
+            System.out.println("File not found: " + file);
+            return false;
+        }
+
+        if (!Files.isRegularFile(path)) {
+            System.out.println("Path is not a file: " + file);
+            return false;
+        }
+
+        if (!Files.isReadable(path)) {
+            System.out.println("File is not readable: " + file);
+            return false;
+        }
+
+        return true;
     }
 }
