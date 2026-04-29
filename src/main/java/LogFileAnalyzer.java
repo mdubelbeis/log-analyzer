@@ -1,7 +1,14 @@
 
+import model.LogEntry;
+import model.LogLevel;
+import model.LogSummary;
+import parser.LogEntryParser;
+import service.LogAnalyzerService;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,9 +33,15 @@ public class LogFileAnalyzer {
                 } else if (args.length == 2) {
                     String file = args[1];
 
-                    if (isValidFilePath(file)) {
+                    if (isValidFilePath(file)) { // validate file
                         System.out.println("Processing summary command for: " + file);
-                        printSummary(file);
+                        List<String> lines = readAllLines(file); // read raw lines
+
+                        List<LogEntry> entries = parseEntries(lines); // parse raw lines into LogEntry objects
+                        LogAnalyzerService logAnalyzerService = new LogAnalyzerService();
+                        LogSummary summary = logAnalyzerService.summarize(entries); // send parsed entries to service
+
+                        printSummary(summary); // print the summary
                     }
 
                 } else {
@@ -47,7 +60,7 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing errors command for: " + file);
-                        printLinesByLevel(file, "ERROR");
+                        printLinesByLevel(file, LogLevel.ERROR);
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -65,7 +78,7 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing warnings command for: " + file);
-                        printLinesByLevel(file, "WARN");
+                        printLinesByLevel(file, LogLevel.WARN);
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -145,27 +158,32 @@ public class LogFileAnalyzer {
         }
     }
 
-    public static void printSummary(String file) {
-        List<String> allLines = readAllLines(file);
+    public static List<LogEntry> parseEntries(List<String> lines) {
+        ArrayList<LogEntry> entries = new ArrayList<>();
 
-        int infoCount = 0, warnCount = 0, errorCount = 0;
-        for (String line: allLines) {
-            if (line.contains("INFO")) infoCount += 1;
-            if (line.contains("WARN")) warnCount += 1;
-            if (line.contains("ERROR")) errorCount += 1;
+        for (String line: lines) {
+            LogEntry logEntry = LogEntryParser.parseLog(line);
+            entries.add(logEntry);
         }
 
-        System.out.println("Total lines: " + allLines.size());
-        System.out.println("INFO: " + infoCount);
-        System.out.println("WARN: " + warnCount);
-        System.out.println("ERROR: " + errorCount);
+        return entries;
     }
 
-    public static void printLinesByLevel(String file, String level) {
+    public static void printSummary(LogSummary summary) {
+        System.out.println("Total lines: " + summary.getTotalCount());
+        System.out.println("INFO: " + summary.getInfoCount());
+        System.out.println("WARN: " + summary.getWarnCount());
+        System.out.println("ERROR: " + summary.getErrorCount());
+        System.out.println("UNKNOWN: " + summary.getUnknownCount());
+    }
+
+    public static void printLinesByLevel(String file, LogLevel level) {
         List<String> allLines = readAllLines(file);
         int matchCount = 0;
         for (String line: allLines) {
-            if (line.contains(level)) {
+            LogEntry logEntry = LogEntryParser.parseLog(line);
+
+            if (logEntry.getLevel() == level) {
                 matchCount += 1;
                 System.out.println("\t" + line);
             }
@@ -178,8 +196,9 @@ public class LogFileAnalyzer {
         int matchCount = 0;
 
         for (String line: allLines) {
-            String lowerCaseLine = line.toLowerCase();
-            if (lowerCaseLine.contains(keyword)) {
+            LogEntry logEntry = LogEntryParser.parseLog(line);
+
+            if (logEntry.getRawLine().toLowerCase().contains(keyword)) {
                 matchCount += 1;
                 System.out.println("\t" + line);
             }
