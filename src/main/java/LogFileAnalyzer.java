@@ -41,7 +41,15 @@ public class LogFileAnalyzer {
                         try {
                             List<String> allLines = Files.readAllLines(Path.of(file));
                             System.out.println("Total lines: " + allLines.size());
-                            return;
+                            int infoCount = 0, warnCount = 0, errorCount = 0;
+                            for (String line: allLines) {
+                                if (line.contains("INFO")) infoCount += 1;
+                                if (line.contains("WARN")) warnCount += 1;
+                                if (line.contains("ERROR")) errorCount += 1;
+                            }
+                            System.out.println("INFO: " + infoCount);
+                            System.out.println("WARN: " + warnCount);
+                            System.out.println("ERROR: " + errorCount);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
