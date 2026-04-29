@@ -51,7 +51,8 @@ public class LogFileAnalyzer {
                             System.out.println("WARN: " + warnCount);
                             System.out.println("ERROR: " + errorCount);
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            System.out.println("Could not read file: " + file);
+                            System.out.println("Reason: " + e.getMessage());
                         }
                     }
 
@@ -71,6 +72,20 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing errors command for: " + file);
+                        try {
+                            List<String> allLines = Files.readAllLines(Path.of(file));
+                            int errorCount = 0;
+                            for (String line: allLines) {
+                                if (line.contains("ERROR")) {
+                                    errorCount += 1;
+                                    System.out.println("\t" + line);
+                                }
+                            }
+                            System.out.println("Total Errors: " + errorCount);
+                        } catch (IOException e) {
+                            System.out.println("Could not read file: " + file);
+                            System.out.println("Reason: " + e.getMessage());
+                        }
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -89,6 +104,20 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing warnings command for: " + file);
+                        try {
+                            List<String> allLines = Files.readAllLines(Path.of(file));
+                            int warnCount = 0;
+                            for (String line: allLines) {
+                                if (line.contains("WARN")) {
+                                    warnCount += 1;
+                                    System.out.println("\t" + line);
+                                }
+                            }
+                            System.out.println("Total Warnings: " + warnCount);
+                        } catch (IOException e) {
+                            System.out.println("Could not read file: " + file);
+                            System.out.println("Reason: " + e.getMessage());
+                        }
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -106,11 +135,27 @@ public class LogFileAnalyzer {
                     System.out.println("Usage:");
                     System.out.println("\tlogtool search <keyword> <file>");
                 } else if (args.length == 3) {
-                   String searchWord = args[1];
+                   String searchWord = args[1].toLowerCase();
                    String file = args[2];
 
                    if (isValidFilePath(file)) {
                        System.out.println("Processing search command for: " + searchWord + " in " + file);
+                       try {
+                           List<String> allLines = Files.readAllLines(Path.of(file));
+                           int matchCount = 0;
+
+                           for (String line: allLines) {
+                               String lowerCaseLine = line.toLowerCase();
+                               if (lowerCaseLine.contains(searchWord)) {
+                                   matchCount += 1;
+                                   System.out.println("\t" + line);
+                               }
+                           }
+                           System.out.println("Total found: " + matchCount);
+                       } catch (IOException e) {
+                           System.out.println("Could not read file: " + file);
+                           System.out.println("Reason: " + e.getMessage());
+                       }
                    }
                } else {
                    System.out.println("Too many arguments passed.");
