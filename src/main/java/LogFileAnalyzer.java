@@ -1,7 +1,5 @@
 
-import model.LogEntry;
-import model.LogLevel;
-import model.LogSummary;
+import model.*;
 import parser.LogEntryParser;
 import service.LogAnalyzerService;
 
@@ -19,6 +17,7 @@ public class LogFileAnalyzer {
             return;
         }
 
+        LogAnalyzerService logAnalyzerService = new LogAnalyzerService();
         String command = args[0];
 
         switch (command) {
@@ -35,10 +34,7 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) { // validate file
                         System.out.println("Processing summary command for: " + file);
-                        List<String> lines = readAllLines(file); // read raw lines
-
-                        List<LogEntry> entries = parseEntries(lines); // parse raw lines into LogEntry objects
-                        LogAnalyzerService logAnalyzerService = new LogAnalyzerService();
+                        List<LogEntry> entries = loadEntries(file);
                         LogSummary summary = logAnalyzerService.summarize(entries); // send parsed entries to service
 
                         printSummary(summary); // print the summary
@@ -60,7 +56,10 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing errors command for: " + file);
-                        printLinesByLevel(file, LogLevel.ERROR);
+                        List<LogEntry> entries = loadEntries(file);
+                        List<LogEntry> matches =  logAnalyzerService.filterByLevel(entries, LogLevel.ERROR);
+
+                        printLines(matches);
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -78,7 +77,10 @@ public class LogFileAnalyzer {
 
                     if (isValidFilePath(file)) {
                         System.out.println("Processing warnings command for: " + file);
-                        printLinesByLevel(file, LogLevel.WARN);
+                        List<LogEntry> entries = loadEntries(file);
+                        List<LogEntry> matches = logAnalyzerService.filterByLevel(entries, LogLevel.WARN);
+
+                        printLines(matches);
                     }
                 } else {
                     System.out.println("Too many arguments passed.");
@@ -102,7 +104,10 @@ public class LogFileAnalyzer {
 
                    if (isValidFilePath(file)) {
                        System.out.println("Processing search command for: " + originalKeyword + " in " + file);
-                       searchLines(file, keyword);
+                       List<LogEntry> entries = loadEntries(file);
+                       List<LogEntry> matches = logAnalyzerService.search(entries, keyword);
+
+                       printLines(matches);
                    }
                } else {
                    System.out.println("Too many arguments passed.");
@@ -177,33 +182,16 @@ public class LogFileAnalyzer {
         System.out.println("UNKNOWN: " + summary.getUnknownCount());
     }
 
-    public static void printLinesByLevel(String file, LogLevel level) {
-        List<String> allLines = readAllLines(file);
-        int matchCount = 0;
-        for (String line: allLines) {
-            LogEntry logEntry = LogEntryParser.parseLog(line);
-
-            if (logEntry.getLevel() == level) {
-                matchCount += 1;
-                System.out.println("\t" + line);
-            }
+    public static void printLines(List<LogEntry> matches) {
+        for (LogEntry match: matches) {
+            System.out.println("\t" + match.getRawLine());
         }
-        System.out.println("Total " + level + ": " + matchCount);
+        System.out.println("COUNT: " + matches.size());
     }
 
-    public static void searchLines(String file, String keyword) {
-        List<String> allLines = readAllLines(file);
-        int matchCount = 0;
-
-        for (String line: allLines) {
-            LogEntry logEntry = LogEntryParser.parseLog(line);
-
-            if (logEntry.getRawLine().toLowerCase().contains(keyword)) {
-                matchCount += 1;
-                System.out.println("\t" + line);
-            }
-        }
-        System.out.println("Total found: " + matchCount);
+    public static List<LogEntry> loadEntries(String file) {
+        List<String> lines = readAllLines(file);
+        return parseEntries(lines);
     }
 
 }

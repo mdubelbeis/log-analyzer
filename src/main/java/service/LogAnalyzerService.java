@@ -1,9 +1,8 @@
 package service;
 
-import model.LogEntry;
-import model.LogLevel;
-import model.LogSummary;
+import model.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LogAnalyzerService {
@@ -23,6 +22,26 @@ public class LogAnalyzerService {
         }
 
         return new LogSummary(totalCount, infoCount, warnCount, errorCount, unknownCount);
-
     }
+
+    public List<LogEntry> filterByLevel(List<LogEntry> entries, LogLevel level) {
+        ArrayList<LogEntry> matches = new ArrayList<>();
+        for (LogEntry entry: entries) {
+            if (entry.getLevel() == level) {
+                matches.add(entry);
+            }
+        }
+        return matches;
+    }
+
+    public List<LogEntry> search(List<LogEntry> entries, String keyword) {
+        List<LogEntry> matches = new ArrayList<>();
+        for (LogEntry entry: entries) {
+            if (entry.getRawLine().toLowerCase().contains(keyword)) {
+                matches.add(entry);
+            }
+        }
+        return matches;
+    }
+
 }
