@@ -25,94 +25,50 @@ public class LogFileAnalyzer {
                 displayHelp();
             }
             case "summary" -> {
-                if (args.length == 1) {
-                    System.out.println("Missing file path.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool summary <file>");
-                } else if (args.length == 2) {
+                if (args.length == 2) {
                     String file = args[1];
 
-                    if (isValidFilePath(file)) { // validate file
-                        System.out.println("Processing summary command for: " + file);
-                        List<LogEntry> entries = loadEntries(file);
-                        LogSummary summary = logAnalyzerService.summarize(entries); // send parsed entries to service
-
-                        printSummary(summary); // print the summary
+                    if (isValidFilePath(file)) {
+                        handleSummary(file, logAnalyzerService);
                     }
-
                 } else {
-                    System.out.println("Too many arguments passed.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool summary <file>");
+                    printSummaryUsage(args);
                 }
             }
             case "errors" -> {
-                if (args.length == 1) {
-                    System.out.println("Missing file path.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool errors <file>");
-                } else if (args.length == 2) {
+                if (args.length == 2) {
                     String file = args[1];
 
                     if (isValidFilePath(file)) {
-                        System.out.println("Processing errors command for: " + file);
-                        List<LogEntry> entries = loadEntries(file);
-                        List<LogEntry> matches =  logAnalyzerService.filterByLevel(entries, LogLevel.ERROR);
-
-                        printLines(matches);
+                        handleErrors(file, logAnalyzerService);
                     }
                 } else {
-                    System.out.println("Too many arguments passed.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool errors <file>");
+                    printErrorsUsage(args);
                 }
             }
             case "warnings" -> {
-                if (args.length == 1) {
-                    System.out.println("Missing file path.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool warnings <file>");
-                } else if (args.length == 2) {
+                if (args.length == 2) {
                     String file = args[1];
 
                     if (isValidFilePath(file)) {
-                        System.out.println("Processing warnings command for: " + file);
-                        List<LogEntry> entries = loadEntries(file);
-                        List<LogEntry> matches = logAnalyzerService.filterByLevel(entries, LogLevel.WARN);
-
-                        printLines(matches);
+                        handleWarnings(file, logAnalyzerService);
                     }
                 } else {
-                    System.out.println("Too many arguments passed.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool warnings <file>");
+                    printWarningsUsage(args);
                 }
             }
             case "search" -> {
-               if (args.length == 1) {
-                    System.out.println("Missing keyword and file.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool search <keyword> <file>");
-                } else if (args.length == 2) {
-                    System.out.println("Missing file.");
-                    System.out.println("Usage:");
-                    System.out.println("\tlogtool search <keyword> <file>");
-                } else if (args.length == 3) {
+               if (args.length == 3) {
                    String originalKeyword = args[1];
                    String keyword = originalKeyword.toLowerCase();
                    String file = args[2];
 
                    if (isValidFilePath(file)) {
                        System.out.println("Processing search command for: " + originalKeyword + " in " + file);
-                       List<LogEntry> entries = loadEntries(file);
-                       List<LogEntry> matches = logAnalyzerService.search(entries, keyword);
-
-                       printLines(matches);
+                       handleSearch(file, keyword, logAnalyzerService);
                    }
                } else {
-                   System.out.println("Too many arguments passed.");
-                   System.out.println("Usage:");
-                   System.out.println("\tlogtool search <keyword> <file>");
+                    printSearchUsage(args);
                }
             }
             default -> {
@@ -121,6 +77,90 @@ public class LogFileAnalyzer {
             }
         }
 
+    }
+
+    public static void handleSummary(String file, LogAnalyzerService logAnalyzerService) {
+        System.out.println("Processing summary command for: " + file);
+        List<LogEntry> entries = loadEntries(file);
+        LogSummary summary = logAnalyzerService.summarize(entries);
+
+        printSummary(summary);
+    }
+
+    public static void handleErrors(String file, LogAnalyzerService logAnalyzerService) {
+        System.out.println("Processing errors command for: " + file);
+        List<LogEntry> entries = loadEntries(file);
+        List<LogEntry> matches =  logAnalyzerService.filterByLevel(entries, LogLevel.ERROR);
+
+        printLines(matches);
+    }
+
+    public static void handleWarnings(String file, LogAnalyzerService logAnalyzerService) {
+        System.out.println("Processing warnings command for: " + file);
+        List<LogEntry> entries = loadEntries(file);
+        List<LogEntry> matches = logAnalyzerService.filterByLevel(entries, LogLevel.WARN);
+
+        printLines(matches);
+    }
+
+    public static void handleSearch(String file, String keyword, LogAnalyzerService logAnalyzerService) {
+        List<LogEntry> entries = loadEntries(file);
+        List<LogEntry> matches = logAnalyzerService.search(entries, keyword);
+
+        printLines(matches);
+    }
+
+    public static void printSummaryUsage(String[] args) {
+        if (args.length == 1) {
+            System.out.println("Missing file path.");
+            System.out.println("Usage:");
+            System.out.println("\tlogtool summary <file>");
+            return;
+        }
+        System.out.println("Too many arguments passed.");
+        System.out.println("Usage:");
+        System.out.println("\tlogtool summary <file>");
+    }
+
+    public static void printErrorsUsage(String[] args) {
+        if (args.length == 1) {
+            System.out.println("Missing file path.");
+            System.out.println("Usage:");
+            System.out.println("\tlogtool errors <file>");
+            return;
+        }
+        System.out.println("Too many arguments passed.");
+        System.out.println("Usage:");
+        System.out.println("\tlogtool errors <file>");
+    }
+
+    public static void printWarningsUsage(String[] args) {
+        if (args.length == 1) {
+            System.out.println("Missing file path.");
+            System.out.println("Usage:");
+            System.out.println("\tlogtool warnings <file>");
+            return;
+        }
+        System.out.println("Too many arguments passed.");
+        System.out.println("Usage:");
+        System.out.println("\tlogtool warnings <file>");
+    }
+
+    public static void printSearchUsage(String[] args) {
+        if (args.length == 1) {
+            System.out.println("Missing keyword and file.");
+            System.out.println("Usage:");
+            System.out.println("\tlogtool search <keyword> <file>");
+            return;
+        } else if (args.length == 2) {
+            System.out.println("Missing file.");
+            System.out.println("Usage:");
+            System.out.println("\tlogtool search <keyword> <file>");
+            return;
+        }
+        System.out.println("Too many arguments passed.");
+        System.out.println("Usage:");
+        System.out.println("\tlogtool search <keyword> <file>");
     }
 
     public static boolean isValidFilePath(String file) {
