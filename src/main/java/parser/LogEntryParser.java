@@ -8,21 +8,20 @@ import java.time.LocalDateTime;
 public class LogEntryParser {
     public static LogEntry parseLog(String line) {
         String[] splitLine = line.split(" ", 4);
+        LocalDateTime timestamp = LocalDateTime.MAX;
 
         if (splitLine.length < 4) {
-            return new LogEntry(LocalDateTime.now(), LogLevel.UNKNOWN, line, line);
+            return new LogEntry(timestamp, LogLevel.UNKNOWN, "Valid log input not received.", line);
         }
-
-        LocalDateTime timestamp = parseDateTimeFromLog(splitLine[0], splitLine[1]);
-        String message = splitLine[3];
 
         try {
+            timestamp = parseDateTimeFromLog(splitLine[0], splitLine[1]);
+            String message = splitLine[3];
             LogLevel level = LogLevel.valueOf(splitLine[2].toUpperCase());
             return new LogEntry(timestamp, level, message, line);
-        } catch (IllegalArgumentException e) {
-            return new LogEntry(timestamp, LogLevel.UNKNOWN, message, line);
+        } catch (Exception e) {
+            return new LogEntry(timestamp, LogLevel.UNKNOWN, "Valid log input not received.", line);
         }
-
     }
 
     public static LocalDateTime parseDateTimeFromLog(String date, String time) {

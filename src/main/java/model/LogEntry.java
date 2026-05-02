@@ -15,6 +15,7 @@ public class LogEntry {
         this.rawLine = rawLine;
     }
 
+
     public LocalDateTime getTimestamp() {
         return timestamp;
     }

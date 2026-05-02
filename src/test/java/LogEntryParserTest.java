@@ -1,6 +1,5 @@
 import model.LogEntry;
 import model.LogLevel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import parser.LogEntryParser;
 
@@ -41,7 +40,7 @@ class LogEntryParserTest {
 
     @Test
     void shouldParseUnknownLogLine() {
-        String line = "2026-04-28 09:04:10 XXXXX User login successful";
+        String line = "2026-04-28 09:04:10 BANANA User login successful";
         LogEntry logEntry = LogEntryParser.parseLog(line);
 
         assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
@@ -55,6 +54,61 @@ class LogEntryParserTest {
         assertEquals("Failed to process payment request", logEntry.getMessage());
         assertEquals(LogLevel.ERROR, logEntry.getLevel());
         assertEquals(LocalDateTime.of(2026, 4, 28, 9, 6,45), logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
+    }
+
+    @Test
+    void shouldParseFullLogEntryWithIncorrectLevel() {
+        String line = "2026-04-28 09:06:45 BANANA Failed to process payment request";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Valid log input not received.", logEntry.getMessage());
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+        assertEquals(LocalDateTime.of(2026, 4, 28, 9, 6,45), logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
+    }
+
+    @Test
+    void shouldParseFullLogEntryWithIncorrectDate() {
+        String line = "bad-date 09:06:45 ERROR Failed to process payment request";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Valid log input not received.", logEntry.getMessage());
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+        assertEquals(LocalDateTime.MAX, logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
+    }
+
+    @Test
+    void shouldReturnUnknownLogEntryWhenLineIsBlank()  {
+        String line = "";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Valid log input not received.", logEntry.getMessage());
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+        assertEquals(LocalDateTime.MAX, logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
+    }
+
+    @Test
+    void shouldReturnUnknownLogEntryWhenLineHasTooFewParts() {
+        String line = "TESTING ERROR ONE";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Valid log input not received.", logEntry.getMessage());
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+        assertEquals(LocalDateTime.MAX, logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
+    }
+
+    @Test
+    void shouldReturnUnknownLogEntryWhenMessageIsMissing() {
+        String line = "2026-04-28 09:06:45 ERROR";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Valid log input not received.", logEntry.getMessage());
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+        assertEquals(LocalDateTime.MAX, logEntry.getTimestamp());
         assertEquals(line, logEntry.getRawLine());
     }
 }
