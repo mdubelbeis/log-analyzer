@@ -1,3 +1,6 @@
+import model.LogEntry;
+import model.LogLevel;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import parser.LogEntryParser;
 
@@ -10,5 +13,48 @@ class LogEntryParserTest {
     void shouldParseDateTimeFromLog() {
         LocalDateTime timestamp = LogEntryParser.parseDateTimeFromLog("2026-04-28","09:10:30");
         assertEquals(LocalDateTime.of(2026, 4, 28, 9, 10, 30), timestamp);
+    }
+
+    @Test
+    void shouldParseErrorLogLine() {
+        String line = "2026-04-28 09:09:55 ERROR Database connection lost";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals(LogLevel.ERROR, logEntry.getLevel());
+    }
+
+    @Test
+    void shouldParseWarningLogLine() {
+        String line = "2026-04-28 09:05:33 WARN API response time exceeded threshold";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals(LogLevel.WARN, logEntry.getLevel());
+    }
+
+    @Test
+    void shouldParseInfoLogLine() {
+        String line = "2026-04-28 09:04:10 INFO User login successful";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals(LogLevel.INFO, logEntry.getLevel());
+    }
+
+    @Test
+    void shouldParseUnknownLogLine() {
+        String line = "2026-04-28 09:04:10 XXXXX User login successful";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals(LogLevel.UNKNOWN, logEntry.getLevel());
+    }
+
+    @Test
+    void shouldParseFullLogEntry() {
+        String line = "2026-04-28 09:06:45 ERROR Failed to process payment request";
+        LogEntry logEntry = LogEntryParser.parseLog(line);
+
+        assertEquals("Failed to process payment request", logEntry.getMessage());
+        assertEquals(LogLevel.ERROR, logEntry.getLevel());
+        assertEquals(LocalDateTime.of(2026, 4, 28, 9, 6,45), logEntry.getTimestamp());
+        assertEquals(line, logEntry.getRawLine());
     }
 }
