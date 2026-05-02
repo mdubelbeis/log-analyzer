@@ -2,6 +2,9 @@ package model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -10,7 +13,7 @@ class LogEntryTest {
 
     @BeforeEach
     void setUp() {
-        String timestamp = "2026-04-28 09:10:30";
+        LocalDateTime timestamp = LocalDateTime.of(2026,4,28, 9,10,30);
         String message = "Application shutdown requested";
         String rawLine = "2026-04-28 09:10:30 ERROR Application shutdown requested";
 
@@ -30,6 +33,6 @@ class LogEntryTest {
 
     @Test
     void shouldCreateLogEntryWithTimestamp() {
-        assertEquals("2026-04-28 09:10:30", logEntry.getTimestamp());
+        assertEquals(LocalDateTime.of(2026,4,28, 9,10,30), logEntry.getTimestamp());
     }
 }

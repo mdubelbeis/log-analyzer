@@ -1,20 +1,21 @@
 package model;
 
-public class LogEntry {
-    private final String timestamp;
+import java.time.LocalDateTime;
 
+public class LogEntry {
+    private final LocalDateTime timestamp;
     private final LogLevel level;
     private final String message;
     private final String rawLine;
 
-    public LogEntry(String timestamp, LogLevel level, String message, String rawLine) {
+    public LogEntry(LocalDateTime timestamp, LogLevel level, String message, String rawLine) {
         this.timestamp = timestamp;
         this.level = level;
         this.message = message;
         this.rawLine = rawLine;
     }
 
-    public String getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
