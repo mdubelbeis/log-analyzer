@@ -3,18 +3,24 @@ package service;
 import model.LogEntry;
 import model.LogLevel;
 import model.LogSummary;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogAnalyzerServiceTest {
 
-    @Test
-    void shouldSummarizeLogEntriesByLevel() {
-        List<LogEntry> entries = List.of(
+    private List<LogEntry> entries;
+    private List<LogEntry> errorResults;
+    private List<LogEntry> warnResults;
+    private List<LogEntry> infoResults;
+    private List<LogEntry> unknownResults;
+    private LogAnalyzerService logAnalyzerService;
+
+    @BeforeEach
+    void setUp() {
+        entries = List.of(
                 new LogEntry(
                         LocalDateTime.of(2026, 4, 28, 9, 0, 1),
                         LogLevel.INFO,
@@ -74,15 +80,67 @@ class LogAnalyzerServiceTest {
                         LogLevel.INFO,
                         "Application shutdown requested",
                         "2026-04-28 09:10:30 INFO Application shutdown requested"
+                ),
+                new LogEntry(
+                        LocalDateTime.of(2026, 4, 28, 9, 10, 30),
+                        LogLevel.UNKNOWN,
+                        "",
+                        ""
                 )
         );
+        logAnalyzerService = new LogAnalyzerService();
+        errorResults = logAnalyzerService.filterByLevel(entries, LogLevel.ERROR);
+        warnResults = logAnalyzerService.filterByLevel(entries, LogLevel.WARN);
+        infoResults = logAnalyzerService.filterByLevel(entries, LogLevel.INFO);
+        unknownResults = logAnalyzerService.filterByLevel(entries, LogLevel.UNKNOWN);
 
-        LogSummary actualLogSummary = new LogAnalyzerService().summarize(entries);
+    }
 
-        assertEquals(10, actualLogSummary.getTotalCount());
+    @Test
+    void shouldSummarizeLogEntriesByLevel() {
+        LogSummary actualLogSummary = logAnalyzerService.summarize(entries);
+
+        assertEquals(11, actualLogSummary.getTotalCount());
         assertEquals(5, actualLogSummary.getInfoCount());
         assertEquals(2, actualLogSummary.getWarnCount());
         assertEquals(3, actualLogSummary.getErrorCount());
-        assertEquals(0, actualLogSummary.getUnknownCount());
+        assertEquals(1, actualLogSummary.getUnknownCount());
+    }
+
+    @Test
+    void shouldFilterErrorEntriesByLevel() {
+        assertEquals(3, errorResults.size());
+
+        for (LogEntry entry: errorResults) {
+            assertEquals(LogLevel.ERROR, entry.getLevel());
+        }
+    }
+
+    @Test
+    void shouldFilterWarnEntriesByLevel() {
+        assertEquals(2, warnResults.size());
+
+        for(LogEntry entry: warnResults) {
+            assertEquals(LogLevel.WARN, entry.getLevel());
+        }
+    }
+
+    @Test
+    void shouldFilterInfoEntriesByLevel() {
+        assertEquals(5, infoResults.size());
+
+        for (LogEntry entry: infoResults) {
+            assertEquals(LogLevel.INFO, entry.getLevel());
+        }
+    }
+
+    @Test
+    void shouldFilterUnknownEntriesByLevel() {
+        assertEquals(1, unknownResults.size());
+
+        for (LogEntry entry: unknownResults) {
+            assertEquals(LogLevel.UNKNOWN, entry.getLevel());
+        }
+
     }
 }
