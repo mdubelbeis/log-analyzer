@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LogAnalyzerServiceTest {
 
@@ -17,6 +18,8 @@ class LogAnalyzerServiceTest {
     private List<LogEntry> infoResults;
     private List<LogEntry> unknownResults;
     private LogAnalyzerService logAnalyzerService;
+
+    private List<LogEntry> emptyEntries;
 
     @BeforeEach
     void setUp() {
@@ -94,6 +97,9 @@ class LogAnalyzerServiceTest {
         infoResults = logAnalyzerService.filterByLevel(entries, LogLevel.INFO);
         unknownResults = logAnalyzerService.filterByLevel(entries, LogLevel.UNKNOWN);
 
+        // Edge-Case
+        emptyEntries = List.of();
+
     }
 
     @Test
@@ -108,6 +114,18 @@ class LogAnalyzerServiceTest {
     }
 
     @Test
+    void shouldReturnZeroSummaryForEmptyEntries() {
+        LogSummary actualLogSummary = logAnalyzerService.summarize(emptyEntries);
+        assertEquals(0, actualLogSummary.getTotalCount());
+        assertEquals(0, actualLogSummary.getInfoCount());
+        assertEquals(0, actualLogSummary.getWarnCount());
+        assertEquals(0, actualLogSummary.getErrorCount());
+        assertEquals(0, actualLogSummary.getUnknownCount());
+    }
+
+
+
+    @Test
     void shouldFilterErrorEntriesByLevel() {
         assertEquals(3, errorResults.size());
 
@@ -117,12 +135,32 @@ class LogAnalyzerServiceTest {
     }
 
     @Test
+    void shouldReturnEmptyListWhenFilteringEmptyEntries() {
+        List<LogEntry> errorResults = logAnalyzerService.filterByLevel(emptyEntries, LogLevel.ERROR);
+        List<LogEntry> warnResults = logAnalyzerService.filterByLevel(emptyEntries, LogLevel.WARN);
+        List<LogEntry> infoResults = logAnalyzerService.filterByLevel(emptyEntries, LogLevel.INFO);
+        List<LogEntry> unknownResults = logAnalyzerService.filterByLevel(emptyEntries, LogLevel.UNKNOWN);
+
+        assertTrue(errorResults.isEmpty());
+        assertTrue(warnResults.isEmpty());
+        assertTrue(infoResults.isEmpty());
+        assertTrue(unknownResults.isEmpty());
+    }
+
+    @Test
     void shouldFilterWarnEntriesByLevel() {
         assertEquals(2, warnResults.size());
 
         for(LogEntry entry: warnResults) {
             assertEquals(LogLevel.WARN, entry.getLevel());
         }
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenSearchingEmptyEntries() {
+        List<LogEntry> searchResults =logAnalyzerService.search(emptyEntries, "database");
+
+        assertTrue(searchResults.isEmpty());
     }
 
     @Test
@@ -143,4 +181,16 @@ class LogAnalyzerServiceTest {
         }
 
     }
+
+    @Test
+    void shouldSearchLogEntriesByKeyword() {
+        List<LogEntry> results = logAnalyzerService.search(entries, "database");
+
+        assertEquals(3, results.size());
+
+        for (LogEntry result: results) {
+            assertTrue(result.getRawLine().toLowerCase().contains("database"));
+        }
+    }
+
 }
