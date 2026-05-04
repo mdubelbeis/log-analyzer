@@ -2,13 +2,19 @@ import model.LogEntry;
 import model.LogLevel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LogFileAnalyzerTest {
 
+    @TempDir
+    Path tempDir;
     private List<String> lines;
     private final List<String> emptyLines = List.of();
     private List<LogEntry> results;
@@ -35,7 +41,7 @@ class LogFileAnalyzerTest {
 
     @Test
     void shouldReturnEmptyListWhenNoLinesProvided() {
-        assertEquals(0, emptyLines.size());
+        assertEquals(0, LogFileAnalyzer.parseEntries(emptyLines).size());
     }
 
     @Test
@@ -51,6 +57,17 @@ class LogFileAnalyzerTest {
         assertEquals(LocalDateTime.of(2026, 4, 28, 9, 0, 1), firstEntry.getTimestamp());
         assertEquals("Application started", firstEntry.getMessage());
         assertEquals("2026-04-28 09:00:01 INFO Application started", firstEntry.getRawLine());
+    }
+
+    @Test
+    void shouldReadAllLinesFromFile() throws IOException {
+        Path logFile = tempDir.resolve("test.log");
+        Files.write(logFile, lines);
+
+        List<String> results = LogFileAnalyzer.readAllLines(logFile.toString());
+        assertEquals(11, results.size());
+        assertEquals("2026-04-28 09:00:01 INFO Application started", results.getFirst());
+        assertEquals("2026-04-28 09:11:33 UNKNOWN Application shutdown requested", results.getLast());
     }
 
 }

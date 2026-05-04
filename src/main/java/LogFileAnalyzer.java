@@ -199,7 +199,7 @@ public class LogFileAnalyzer {
         } catch (IOException e) {
             System.out.println("Could not read file: " + file);
             System.out.println("Reason: " + e.getMessage());
-            return List.of(); // TODO: add more clear logic
+            return List.of();
         }
     }
 
