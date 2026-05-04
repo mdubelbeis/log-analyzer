@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import service.LogAnalyzerService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -57,6 +58,59 @@ class LogFileAnalyzerTest {
     void tearDown() {
         System.setOut(originalOut);
     }
+
+    @Test
+    void shouldHandleSummaryCommand() throws IOException {
+        Files.write(logFile, lines);
+        LogFileAnalyzer.handleSummary(logFile.toString(), new LogAnalyzerService());
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Processing summary command for: " + logFile));
+        assertTrue(printedOutput.contains("Total lines: 11"));
+        assertTrue(printedOutput.contains("INFO: 5"));
+        assertTrue(printedOutput.contains("WARN: 2"));
+        assertTrue(printedOutput.contains("ERROR: 3"));
+        assertTrue(printedOutput.contains("UNKNOWN: 1"));
+    }
+
+    @Test
+    void shouldHandleErrorsCommand() throws IOException {
+        Files.write(logFile, lines);
+        LogFileAnalyzer.handleErrors(logFile.toString(), new LogAnalyzerService());
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Processing errors command for: " + logFile));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:03:22 ERROR NullPointerException in UserService"));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:09:55 ERROR Database connection lost"));
+        assertTrue(printedOutput.contains("COUNT: 3"));
+    }
+
+    @Test
+    void shouldHandleWarningsCommand() throws IOException {
+        Files.write(logFile, lines);
+        LogFileAnalyzer.handleWarnings(logFile.toString(), new LogAnalyzerService());
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Processing warnings command for: " + logFile));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:02:14 WARN Slow database query detected"));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:05:33 WARN API response time exceeded threshold"));
+        assertTrue(printedOutput.contains("COUNT: 2"));
+    }
+
+    @Test
+    void shouldHandleSearchCommand() throws IOException {
+        Files.write(logFile, lines);
+        LogFileAnalyzer.handleSearch(logFile.toString(), "database", new LogAnalyzerService());
+
+        String printedOutput = output.toString();
+
+
+        assertTrue(printedOutput.contains("\t2026-04-28 09:00:05 INFO Database connection established"));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:09:55 ERROR Database connection lost"));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:02:14 WARN Slow database query detected"));
+        assertTrue(printedOutput.contains("COUNT: 3"));
+    }
+
 
     @Test
     void shouldReturnEmptyListWhenNoLinesProvided() {
