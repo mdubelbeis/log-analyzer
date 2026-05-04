@@ -10,11 +10,15 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class LogFileAnalyzerTest {
 
     @TempDir
     Path tempDir;
+
+    private Path logFile;
     private List<String> lines;
     private final List<String> emptyLines = List.of();
     private List<LogEntry> results;
@@ -37,6 +41,8 @@ class LogFileAnalyzerTest {
         );
 
         results = LogFileAnalyzer.parseEntries(lines);
+        logFile = tempDir.resolve("test.log");
+
     }
 
     @Test
@@ -61,13 +67,29 @@ class LogFileAnalyzerTest {
 
     @Test
     void shouldReadAllLinesFromFile() throws IOException {
-        Path logFile = tempDir.resolve("test.log");
         Files.write(logFile, lines);
 
         List<String> results = LogFileAnalyzer.readAllLines(logFile.toString());
         assertEquals(11, results.size());
         assertEquals("2026-04-28 09:00:01 INFO Application started", results.getFirst());
         assertEquals("2026-04-28 09:11:33 UNKNOWN Application shutdown requested", results.getLast());
+    }
+
+    @Test
+    void shouldReturnTrueWhenFilePathIsValid() throws IOException {
+        Files.write(logFile, lines);
+
+        assertTrue(LogFileAnalyzer.isValidFilePath(logFile.toString()));
+    }
+
+    @Test
+    void shouldReturnFalseWhenFileDoesNotExist() {
+        assertFalse(LogFileAnalyzer.isValidFilePath(logFile.toString()));
+    }
+
+    @Test
+    void shouldReturnFalseWhenPathIsDirectory() {
+        assertFalse(LogFileAnalyzer.isValidFilePath(tempDir.toString()));
     }
 
 }
