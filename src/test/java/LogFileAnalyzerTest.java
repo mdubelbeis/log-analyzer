@@ -1,5 +1,6 @@
 import model.LogEntry;
 import model.LogLevel;
+import model.LogSummary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -215,4 +216,47 @@ class LogFileAnalyzerTest {
         assertTrue(printedOutput.contains("Usage:"));
         assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
     }
+
+    @Test
+    void shouldPrintTotalLinesAndLevelCounts() {
+        LogSummary logSummary = new LogSummary(11, 5, 2, 3, 1);
+
+        LogFileAnalyzer.printSummary(logSummary);
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Total lines: 11"));
+        assertTrue(printedOutput.contains("INFO: 5"));
+        assertTrue(printedOutput.contains("WARN: 2"));
+        assertTrue(printedOutput.contains("ERROR: 3"));
+        assertTrue(printedOutput.contains("UNKNOWN: 1"));
+    }
+
+    @Test
+    void shouldPrintZeroTotalLinesAndLevelCounts() {
+        LogSummary logSummary = new LogSummary(0, 0, 0, 0, 0);
+
+        LogFileAnalyzer.printSummary(logSummary);
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Total lines: 0"));
+        assertTrue(printedOutput.contains("INFO: 0"));
+        assertTrue(printedOutput.contains("WARN: 0"));
+        assertTrue(printedOutput.contains("ERROR: 0"));
+        assertTrue(printedOutput.contains("UNKNOWN: 0"));
+    }
+
+    @Test
+    void shouldPrintLines() {
+        LogFileAnalyzer.printLines(results);
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("\t2026-04-28 09:00:01 INFO Application started"));
+        assertTrue(printedOutput.contains("\t2026-04-28 09:11:33 UNKNOWN Application shutdown requested"));
+        assertTrue(printedOutput.contains("COUNT: 11"));
+    }
+
+
 }
