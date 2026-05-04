@@ -24,73 +24,19 @@ class LogAnalyzerServiceTest {
     @BeforeEach
     void setUp() {
         entries = List.of(
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 0, 1),
-                        LogLevel.INFO,
-                        "Application started",
-                        "2026-04-28 09:00:01 INFO Application started"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 0, 5),
-                        LogLevel.INFO,
-                        "Database connection established",
-                        "2026-04-28 09:00:05 INFO Database connection established"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 2, 14),
-                        LogLevel.WARN,
-                        "Slow database query detected",
-                        "2026-04-28 09:02:14 WARN Slow database query detected"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 3, 22),
-                        LogLevel.ERROR,
-                        "NullPointerException in UserService",
-                        "2026-04-28 09:03:22 ERROR NullPointerException in UserService"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 4, 10),
-                        LogLevel.INFO,
-                        "User login successful",
-                        "2026-04-28 09:04:10 INFO User login successful"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 5, 33),
-                        LogLevel.WARN,
-                        "API response time exceeded threshold",
-                        "2026-04-28 09:05:33 WARN API response time exceeded threshold"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 6, 45),
-                        LogLevel.ERROR,
-                        "Failed to process payment request",
-                        "2026-04-28 09:06:45 ERROR Failed to process payment request"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 8, 12),
-                        LogLevel.INFO,
-                        "Scheduled job completed",
-                        "2026-04-28 09:08:12 INFO Scheduled job completed"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 9, 55),
-                        LogLevel.ERROR,
-                        "Database connection lost",
-                        "2026-04-28 09:09:55 ERROR Database connection lost"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 10, 30),
-                        LogLevel.INFO,
-                        "Application shutdown requested",
-                        "2026-04-28 09:10:30 INFO Application shutdown requested"
-                ),
-                new LogEntry(
-                        LocalDateTime.of(2026, 4, 28, 9, 10, 30),
-                        LogLevel.UNKNOWN,
-                        "",
-                        ""
-                )
+                createEntry(9,0,1, LogLevel.INFO, "Application started"),
+                createEntry(9,0,5, LogLevel.INFO, "Database connection established"),
+                createEntry(9,2,14, LogLevel.WARN, "Slow database query detected"),
+                createEntry(9,3,22, LogLevel.ERROR, "NullPointerException in UserService"),
+                createEntry(9,4,10, LogLevel.INFO, "User login successful"),
+                createEntry(9,5,33, LogLevel.WARN, "API response time exceeded threshold"),
+                createEntry(9,6,45, LogLevel.ERROR, "Failed to process payment request"),
+                createEntry(9,8,12, LogLevel.INFO, "Scheduled job completed"),
+                createEntry(9,9,55, LogLevel.ERROR, "Database connection lost"),
+                createEntry(9,10,30, LogLevel.INFO, "Application shutdown requested"),
+                createEntry(9,10,33, LogLevel.UNKNOWN, "")
         );
+
         logAnalyzerService = new LogAnalyzerService();
         errorResults = logAnalyzerService.filterByLevel(entries, LogLevel.ERROR);
         warnResults = logAnalyzerService.filterByLevel(entries, LogLevel.WARN);
@@ -99,7 +45,6 @@ class LogAnalyzerServiceTest {
 
         // Edge-Case
         emptyEntries = List.of();
-
     }
 
     @Test
@@ -122,8 +67,6 @@ class LogAnalyzerServiceTest {
         assertEquals(0, actualLogSummary.getErrorCount());
         assertEquals(0, actualLogSummary.getUnknownCount());
     }
-
-
 
     @Test
     void shouldFilterErrorEntriesByLevel() {
@@ -179,7 +122,6 @@ class LogAnalyzerServiceTest {
         for (LogEntry entry: unknownResults) {
             assertEquals(LogLevel.UNKNOWN, entry.getLevel());
         }
-
     }
 
     @Test
@@ -191,6 +133,21 @@ class LogAnalyzerServiceTest {
         for (LogEntry result: results) {
             assertTrue(result.getRawLine().toLowerCase().contains("database"));
         }
+    }
+
+    private LogEntry createEntry(int hour, int minute, int second, LogLevel level, String message) {
+        LocalDateTime timestamp = LocalDateTime.of(2026, 4, 28, hour, minute, second);
+
+        String rawLine = String.format(
+                "2026-04-28 %02d:%02d:%02d %s %s",
+                hour,
+                minute,
+                second,
+                level,
+                message
+        );
+
+        return new LogEntry(timestamp, level, message, rawLine);
     }
 
 }
