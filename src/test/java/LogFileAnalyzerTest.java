@@ -60,6 +60,77 @@ class LogFileAnalyzerTest {
     }
 
     @Test
+    void shouldDisplayHelpWhenNoArgumentsProvided() {
+        LogFileAnalyzer.main(new String[]{});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool help"));
+        assertTrue(printedOutput.contains("\tlogtool summary <file>"));
+        assertTrue(printedOutput.contains("\tlogtool errors <file>"));
+        assertTrue(printedOutput.contains("\tlogtool warnings <file>"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
+    }
+
+    @Test
+    void shouldDisplayUnknownCommandMessage() {
+        LogFileAnalyzer.main(new String[]{"unknownCommand"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Unknown command: unknownCommand"  ));
+        assertTrue(printedOutput.contains("Run 'logtool help' to see available commands"));
+    }
+
+    @Test
+    void shouldPrintSummaryUsageWhenSummaryFileIsMissing() {
+        LogFileAnalyzer.main(new String[]{"summary"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file path."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool summary <file>"));
+    }
+
+    @Test
+    void shouldPrintFileNotFoundWhenSummaryFileDoesNotExist() {
+        LogFileAnalyzer.main(new String[]{"summary", "invalid.txt"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("File not found: invalid.txt"));
+    }
+
+    @Test
+    void shouldPrintSearchUsageWhenFileIsMissing() {
+        LogFileAnalyzer.main(new String[]{"search", "database"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
+    }
+
+    @Test
+    void shouldRunSummaryCommandWhenValidFileProvided() throws IOException {
+        Files.write(logFile, lines);
+
+        LogFileAnalyzer.main(new String[]{"summary", logFile.toString()});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Processing summary command for: " + logFile));
+        assertTrue(printedOutput.contains("Total lines: 11"));
+        assertTrue(printedOutput.contains("INFO: 5"));
+        assertTrue(printedOutput.contains("WARN: 2"));
+        assertTrue(printedOutput.contains("ERROR: 3"));
+        assertTrue(printedOutput.contains("UNKNOWN: 1"));
+    }
+
+    @Test
     void shouldHandleSummaryCommand() throws IOException {
         Files.write(logFile, lines);
         LogFileAnalyzer.handleSummary(logFile.toString(), new LogAnalyzerService());
