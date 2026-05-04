@@ -1,10 +1,13 @@
 import model.LogEntry;
 import model.LogLevel;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -16,8 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class LogFileAnalyzerTest {
 
     @TempDir
-    Path tempDir;
+    private Path tempDir;
 
+    private final PrintStream originalOut = System.out;
+    private ByteArrayOutputStream output;
     private Path logFile;
     private List<String> lines;
     private final List<String> emptyLines = List.of();
@@ -43,6 +48,13 @@ class LogFileAnalyzerTest {
         results = LogFileAnalyzer.parseEntries(lines);
         logFile = tempDir.resolve("test.log");
 
+        output = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(output));
+    }
+
+    @AfterEach
+    void tearDown() {
+        System.setOut(originalOut);
     }
 
     @Test
@@ -90,6 +102,19 @@ class LogFileAnalyzerTest {
     @Test
     void shouldReturnFalseWhenPathIsDirectory() {
         assertFalse(LogFileAnalyzer.isValidFilePath(tempDir.toString()));
+    }
+
+    @Test
+    void shouldDisplayHelp() {
+        LogFileAnalyzer.displayHelp();
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool help"));
+        assertTrue(printedOutput.contains("\tlogtool summary <file>"));
+        assertTrue(printedOutput.contains("\tlogtool errors <file>"));
+        assertTrue(printedOutput.contains("\tlogtool warnings <file>"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
     }
 
 }
