@@ -117,4 +117,102 @@ class LogFileAnalyzerTest {
         assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
     }
 
+    @Test
+    void shouldPrintMissingFileMessageForSummaryUsage() {
+        LogFileAnalyzer.printSummaryUsage(new String[]{"summary"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file path."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool summary <file>"));
+    }
+
+    @Test
+    void shouldPrintTooManyArgumentsMessageForSummaryUsage() {
+        LogFileAnalyzer.printSummaryUsage(new String[]{"summary", "file.log", "extra"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Too many arguments passed."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool summary <file>"));
+    }
+
+    @Test
+    void shouldPrintMissingFileMessageForErrorsUsage() {
+        LogFileAnalyzer.printErrorsUsage(new String[]{"errors"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file path."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool errors <file>"));
+    }
+
+    @Test
+    void shouldPrintTooManyArgumentsMessageForErrorUsage() {
+        LogFileAnalyzer.printErrorsUsage(new String[]{"errors", "file.log", "extra"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Too many arguments passed."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool errors <file>"));
+    }
+
+    @Test
+    void shouldPrintMissingFileMessageForWarningsUsage() {
+        LogFileAnalyzer.printWarningsUsage(new String[]{"warnings"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file path."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool warnings <file>"));
+    }
+
+    @Test
+    void shouldPrintTooManyArgumentsMessageForWarningsUsage() {
+        LogFileAnalyzer.printWarningsUsage(new String[]{"warnings", "file.log", "extra"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Too many arguments passed."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool warnings <file>"));
+    }
+
+    @Test
+    void shouldPrintMissingKeywordAndFileMessageForSearchUsage() {
+        LogFileAnalyzer.printSearchUsage(new String[]{"search"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing keyword and file."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
+    }
+
+    @Test
+    void shouldPrintMissingFileMessageForSearchUsage() {
+        LogFileAnalyzer.printSearchUsage(new String[]{"search", "keyword"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Missing file."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
+    }
+
+    @Test
+    void shouldPrintTooManyArgumentsMessageForSearchUsage() {
+        LogFileAnalyzer.printSearchUsage(new String[]{"search", "keyword", "file.text", "extra"});
+
+        String printedOutput = output.toString();
+
+        assertTrue(printedOutput.contains("Too many arguments passed."));
+        assertTrue(printedOutput.contains("Usage:"));
+        assertTrue(printedOutput.contains("\tlogtool search <keyword> <file>"));
+    }
 }
