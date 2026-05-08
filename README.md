@@ -15,4 +15,4 @@ logtool search <keyword> <file>
 ```
 
 ## Author
-Mason Dubelbeis — masondubelbeis.com | LinkedIn | mason.dubelbeis@gmail.com
+Mason Dubelbeis — [Portfolio]https://www.masondubelbeis.com/ | [LinkedIn](https://www.linkedin.com/in/mason-dub/) | mason.dubelbeis@gmail.com
